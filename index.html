@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羊老师编程课堂</title>
+    <style>
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-card: #22283e;
+            --bg-code: #0d1117;
+            --accent-cyan: #00d9ff;
+            --accent-red: #ff6b6b;
+            --accent-green: #4ecc5c;
+            --accent-yellow: #ffd93d;
+            --accent-purple: #c084fc;
+            --accent-orange: #ff950a;
+            --accent-pink: #ff6b9d;
+            --text-white: #ffffff;
+            --text-gray: #b8c5d6;
+            --border-radius: 16px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        #particles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: var(--accent-cyan); display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: var(--text-gray); text-decoration: none; font-size: 14px; transition: color 0.3s; padding: 8px 16px; border-radius: 20px; }
+        .nav-links a:hover, .nav-links a.active { color: var(--accent-cyan); background: rgba(0, 217, 255, 0.1); }
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .hero { text-align: center; padding: 80px 20px; border: 2px solid var(--accent-cyan); border-radius: var(--border-radius); margin-bottom: 40px; background: rgba(34, 40, 62, 0.8); backdrop-filter: blur(10px); }
+        .hero h1 { font-size: 56px; color: var(--accent-cyan); margin-bottom: 20px; text-shadow: 0 0 30px rgba(0, 217, 255, 0.3); }
+        .hero p { font-size: 22px; color: var(--text-gray); margin-bottom: 40px; }
+        .hero-stats { display: flex; justify-content: center; gap: 40px; margin-top: 30px; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 36px; font-weight: bold; color: var(--accent-yellow); }
+        .stat-label { font-size: 14px; color: var(--text-gray); }
+        .btn-primary { display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); color: white; text-decoration: none; border-radius: 30px; font-size: 18px; font-weight: bold; transition: transform 0.3s, box-shadow 0.3s; border: none; cursor: pointer; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3); }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .card { background: var(--bg-card); border-radius: var(--border-radius); padding: 24px; border: 2px solid transparent; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--card-color); }
+        .card:hover { transform: translateY(-5px); border-color: var(--card-color); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .card-number { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; background: var(--card-color); color: white; }
+        .card h3 { font-size: 20px; margin-bottom: 8px; color: var(--text-white); }
+        .card-desc { font-size: 14px; color: var(--text-gray); line-height: 1.5; }
+        .card-icon { font-size: 32px; margin-bottom: 10px; }
+        .question-detail { background: var(--bg-card); border-radius: var(--border-radius); padding: 40px; margin-bottom: 30px; border: 2px solid var(--question-color); }
+        .question-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); }
+        .question-number-big { font-size: 72px; font-weight: bold; color: var(--question-color); line-height: 1; }
+        .question-title-section h2 { font-size: 32px; margin-bottom: 8px; }
+        .question-subtitle { font-size: 16px; color: var(--text-gray); }
+        .difficulty-badge { margin-left: auto; padding: 8px 20px; border-radius: 20px; background: rgba(255,255,255,0.1); border: 1px solid var(--question-color); color: var(--question-color); font-size: 14px; }
+        .content-block { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+        .content-block h4 { color: var(--question-color); font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .content-block p, .content-block li { color: var(--text-white); line-height: 1.8; font-size: 16px; }
+        .code-block { background: var(--bg-code); border-radius: 12px; padding: 20px; font-family: 'Consolas', 'Monaco', monospace; font-size: 14px; color: #a8d8ea; overflow-x: auto; border: 1px solid rgba(255,255,255,0.1); margin: 15px 0; }
+        .example-box { background: rgba(26,34,53,0.8); border-radius: 12px; padding: 20px; border-left: 4px solid var(--question-color); }
+        .tip-box { background: rgba(30,38,58,0.8); border-radius: 12px; padding: 20px; border: 2px solid var(--question-color); margin-top: 20px; }
+        .tip-box h4 { color: var(--question-color); margin-bottom: 10px; }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 30px; }
+        .btn-nav { padding: 12px 30px; background: var(--bg-card); border: 2px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 25px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .btn-nav:hover { background: var(--accent-cyan); color: var(--bg-dark); }
+        .quiz-card { transition: all 0.3s; }
+        .quiz-answer { margin-top: 15px; padding: 10px; background: rgba(78, 204, 92, 0.15); border-left: 4px solid var(--accent-green); border-radius: 8px; font-size: 14px; }
+        .toggle-code { cursor: pointer; user-select: none; }
+        .toggle-code:hover { opacity: 0.8; }
+        /* 学生提交区域 */
+        .student-submit { margin-top: 30px; background: rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; border: 2px dashed var(--question-color); }
+        .student-submit h4 { color: var(--question-color); margin-bottom: 15px; }
+        .student-submit input, .student-submit textarea { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; font-family: inherit; margin-bottom: 15px; }
+        .student-submit textarea { min-height: 120px; }
+        .student-submit button { background: var(--question-color); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        .student-submit button:hover { opacity: 0.9; }
+        /* 教师面板遮罩 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--bg-card); border-radius: 20px; padding: 30px; width: 90%; max-width: 900px; max-height: 80vh; overflow-y: auto; border: 2px solid var(--accent-cyan); }
+        .modal-content h2 { color: var(--accent-cyan); margin-bottom: 20px; }
+        .submission-item { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid var(--accent-green); }
+        .submission-item small { color: var(--text-gray); display: block; margin-bottom: 8px; }
+        .modal-close { float: right; color: var(--accent-red); cursor: pointer; font-size: 24px; border: none; background: none; }
+    </style>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo">羊老师编程课堂</div>
+            <div class="nav-links">
+                <a href="#" class="active" onclick="showSection('home', true); return false;">首页</a>
+                <a href="#" onclick="showSection('quiz', true); return false;">选择题</a>
+                <a href="#" onclick="showSection('questions', true); return false;">编程题</a>
+                <a href="#" onclick="openTeacherPanel(); return false;" style="color:var(--accent-yellow);">查看提交情况</a>
+            </div>
+        </nav>
+
+        <!-- 首页 -->
+        <div id="home" class="section active">
+            <div class="hero">
+                <h1>羊老师编程课堂</h1>
+                <p> 开启快乐之旅</p>
+                <div style="display:flex; gap:20px; justify-content:center;">
+                    <a href="#" class="btn-primary" onclick="showSection('quiz', true); return false;"> 选择题</a>
+                    <a href="#" class="btn-primary" onclick="showSection('questions', true); return false;"> 编程题</a>
+                </div>
+            </div>
+            <h2 style="text-align:center;margin-bottom:30px;color:var(--accent-cyan);">📋 题目总览</h2>
+            <div class="card-grid" id="home-card-grid"></div>
+        </div>
+
+        <!-- 选择题页面 -->
+        <div id="quiz" class="section">
+            <h2 style="text-align:center;margin-bottom:10px;color:var(--accent-pink);">📝 Python基础选择题</h2>
+            <p style="text-align:center;color:var(--text-gray);margin-bottom:40px;">共18道小题，点击卡片验证密码后显示答案 (密码: abc)</p>
+            <div class="card-grid" id="quiz-card-grid"></div>
+        </div>
+
+        <!-- 编程题详情页区域 -->
+        <div id="questions" class="section"></div>
+    </div>
+
+    <!-- 查看面板 -->
+    <div id="teacher-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeTeacherPanel()">✖</button>
+            <h2>学生提交记录</h2>
+            <div id="teacher-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 密码验证状态
+        let passwordVerified = false;
+        const CORRECT_PASSWORD = 'abc';
+        const TEACHER_PASSWORD = 'teacher';
+
+        function verifyPassword() {
+            if (passwordVerified) return true;
+            const input = prompt('请输入密码以查看答案：');
+            if (input === CORRECT_PASSWORD) {
+                passwordVerified = true;
+                return true;
+            } else if (input !== null) {
+                alert('密码错误，无法显示答案！');
+                return false;
+            }
+            return false;
+        }
+
+        // ========== 选择题数据 ==========
+        const quizData = [
+            { q:'以下变量命名正确的是？', opts:['A. 2apple','B. @orange','C. banana','D. if'], ans:2, exp:'✅ C （不能以数字开头，不能用特殊符号，不能是关键字）' },
+            { q:'运行以下代码，输出结果是？\nnums = [3, 6, 9]\nnums.append(12)\nnums.remove(6)\nprint(nums)', opts:['A. [3,6,9,12]','B. [3,9,12]','C. [3,6,12]','D. [6,9,12]'], ans:1, exp:'✅ B （先添加12，再删除第一次出现的6）' },
+            { q:'输入5和3时，输出结果是？\nnum1 = input()\nnum2 = input()\nresult = num1 + num2\nprint(result)', opts:['A. 8','B. 53','C. 5+3','D. 报错'], ans:1, exp:'✅ B （input()返回字符串，加法为拼接）' },
+            { q:'变量 result 的值可能是？\nx = random.randint(1, 3)\ny = random.randint(2, 4)\nresult = x + y', opts:['A. 2','B. 5','C. 7','D. 8'], ans:[1,2], exp:'✅ B 和 C 均可能（和最小3最大7）' },
+            { q:'将 colors=["红色","蓝色","紫色"] 中的 "蓝色" 改为 "黄色"，应使用：', opts:['A. colors[0]="黄色"','B. colors[1]="蓝色"','C. colors[2]="紫色"','D. colors.append("紫色")'], ans:null, exp:'⚠️ 无正确选项。正确写法为 colors[1]="黄色"（索引从0开始）' },
+            { q:'以下选项不是字符串的是？', opts:["A. ' 匠心'","B. shouyi","C. '100'","D. '传承'"], ans:1, exp:'✅ B （shouyi没有引号，不是字符串，是变量名）' },
+            { q:'执行代码，变量 score 的值不可能是？\nfrom random import*\nscore = randint(60, 100)', opts:['A. 60','B. 85','C. 100','D. 59'], ans:3, exp:'✅ D （randint(60,100)包含两端，59不可能）' },
+            { q:'下列变量命名正确的是？', opts:['A. 守艺 #1','B. craft_1','C. lcraft','D. craft!'], ans:[1,2], exp:'✅ B 和 C 均符合规则（A含空格和#，D含!）。B更规范。' },
+            { q:'Python 中，计算 “手艺人数 ×3” 的正确运算符是？', opts:['A. X','B. *','C. /','D. +'], ans:1, exp:'✅ B （乘法运算符是 *）' },
+            { q:'下面代码可以正常运行的是？', opts:['A. if 90>80\n    print(\'优秀\')','B. if 90>80:\n    print(\'优秀\')','C. if 90>80:\nprint(\'优秀\')','D. 90>80:\n    print(\'优秀\')'], ans:1, exp:'✅ B （if后须有冒号，且执行语句需缩进）' },
+            { q:'运行程序，输出的传统手艺是？\ncraft = [\'剪纸\', \'皮影\', \'陶艺\', \'刺绣\', \'木\']\nprint(craft[2])', opts:['A. 皮影','B. 陶艺','C. 刺绣','D. 木雕'], ans:1, exp:'✅ B （列表索引从0开始，索引2为陶艺）' },
+            { q:'运行代码，输出结果是？\na = 20\nb = 15\ntotal = a + b\nprint(total)', opts:['A. 5','B. 20','C. 35','D. 15'], ans:2, exp:'✅ C （20+15=35）' },
+            { q:'运行程序，num 列表最终结果是？\nnum = [1,2,3,4,5]\nnum[4] = 10', opts:['A. [1,2,3,4,10]','B. [1,2,3,10,5]','C. [1,10,3,4,5]','D. [1,2,10,4,5]'], ans:0, exp:'✅ A （索引4是第五个元素，修改为10）' },
+            { q:'代码输出结果是？\npoint = 88\nif point >= 60:\n    print(\'守艺合格\')\nelse:\n    print(\'继续练习\')', opts:['A. 守艺合格','B. 继续练习','C. 88','D. 无输出'], ans:0, exp:'✅ A （88>=60为True）' },
+            { q:'运行代码，输出的数字是？\nages = [12, 15, 9, 18, 7]\nfor n in ages:\n    if n < 10:\n        print(n,end=" ")', opts:['A. 12 15 18','B. 9 7','C. 12','D. 18'], ans:1, exp:'✅ B （遍历列表，条件n<10，输出9和7）' },
+            { q:'运行代码，“传承”会输出几次？\nwhile True:\n    print(\'传承\')\n    break\nprint(\'传承\')', opts:['A. 0 次','B. 1 次','C. 2 次','D. 无数次'], ans:2, exp:'✅ C （循环内一次，循环外一次，共2次）' },
+            { q:'代码输出结果是？\nlevel = 40\nlevel = level * 2\nlevel = level + 25\nif level > 100:\n    print(\'守艺大师\')\nelse:\n    print(\'优秀匠人\')', opts:['A. 100','B. 105','C. 守艺大师','D. 优秀匠人'], ans:2, exp:'✅ C （level=105>100，输出守艺大师）' },
+            { q:'运行代码，最终 a 的值是？\na = 5\nfor i in range(3):\n    a = a + 5\nprint(a)', opts:['A. 10','B. 15','C. 20','D. 25'], ans:2, exp:'✅ C （循环3次加15，5+15=20）' }
+        ];
+
+        // ========== 编程题数据 ==========
+        const allQuestions = [
+            { id:'q0', color:'var(--accent-cyan)', icon:'🧮', title:'找连续数的和', desc:'所有和为n的连续正整数序列', diff:'困难',
+                descFull:'输入一个正整数 n，输出所有和为 n 的连续正整数序列（至少两个数）。若不存在则输出“无”。',
+                inputDesc:'一个正整数 n（n≥1）。', outputDesc:'每行输出一个连续正整数序列，数字之间用空格分隔。若没有则输出“无”。',
+                example:'输入：15\n输出：\n1 2 3 4 5\n4 5 6\n7 8',
+                tip:'<strong>双指针滑动窗口：</strong>用 left 和 right 表示当前序列的起止，维护当前和 sum。',
+                code:'n = int(input())\nfound = False\nleft, right, cur_sum = 1, 2, 3\nwhile left < right and right <= n // 2 + 2:\n    if cur_sum == n:\n        print(*range(left, right+1))\n        found = True\n        cur_sum += right + 1\n        right += 1\n    elif cur_sum < n:\n        right += 1\n        cur_sum += right\n    else:\n        cur_sum -= left\n        left += 1\nif not found:\n    print("无")' },
+            { id:'q1', color:'var(--accent-pink)', icon:'✒️', title:'买笔的方案数', desc:'钢笔10元+圆珠笔3元，正好花完n元', diff:'中等',
+                descFull:'文具店钢笔每支10元，圆珠笔每支3元。两种笔都要买，且钱要刚好花完。输入金额n，计算所有不同购买方案的总数。',
+                inputDesc:'一个正整数 n（n≥13）。', outputDesc:'输出一个整数，表示方案总数。',
+                example:'输入：29\n输出：1\n（解释：钢笔2支+圆珠笔3支，10×2+3×3=29）',
+                tip:'<strong>枚举法：</strong>钢笔最少1支，最多 n//10 支。',
+                code:'n = int(input())\ncount = 0\nfor x in range(1, n // 10 + 1):\n    rest = n - 10 * x\n    if rest > 0 and rest % 3 == 0:\n        count += 1\nprint(count)' },
+            { id:'q2', color:'var(--accent-green)', icon:'🎁', title:'抽奖平板', desc:'能否被2和5整除', diff:'简单', descFull:'号码能同时被2和5整除则获得平板。', inputDesc:'一个正整数1~1000。', outputDesc:'“获得平板”或“没有中奖”。', example:'输入：10\n输出：获得平板', tip:'能同时被2和5整除即能被10整除。', code:'n = int(input())\nif n % 10 == 0:\n    print("获得平板")\nelse:\n    print("没有中奖")' },
+            { id:'q3', color:'var(--accent-orange)', icon:'🐶', title:'小狗喂食', desc:'每周总共吃多少克', diff:'简单', descFull:'每天3次，输入每次克数，求一周总克数。', inputDesc:'每次克数。', outputDesc:'一周总克数。', example:'输入：50\n输出：1050', tip:'总克数 = 每次克数 × 21。', code:'g = int(input())\nprint(g * 3 * 7)' },
+            { id:'q4', color:'var(--accent-yellow)', icon:'⭐', title:'收集星星', desc:'等差数列求和', diff:'简单', descFull:'第1天1颗，每天多1颗，n天总数。', inputDesc:'天数n。', outputDesc:'星星总数。', example:'输入：4\n输出：10', tip:'n*(n+1)//2', code:'n = int(input())\nprint(n*(n+1)//2)' },
+            { id:'q5', color:'var(--accent-purple)', icon:'🔮', title:'符文魔法', desc:'最大不可达到的强度', diff:'困难', descFull:'火符x=a+0.5，风符y=b-1/3，a+b=3且a>b。', inputDesc:'a b (a+b=3,a>b)。', outputDesc:'临界强度值。', example:'输入：2 1\n输出：3', tip:'唯一解a=2,b=1，答案为3。', code:'# 唯一解 a=2, b=1\nprint(3)' },
+            { id:'q6', color:'var(--accent-orange)', icon:'🍬', title:'糖果购买', desc:'恰好花完n元的方案数', diff:'中等', descFull:'棒棒糖5元，巧克力8元，果冻糖10元。', inputDesc:'金额n。', outputDesc:'方案总数。', example:'输入：20\n输出：3', tip:'双重枚举。', code:'n = int(input())\ncount=0\nfor x in range(n//5+1):\n    for y in range((n-5*x)//8+1):\n        if (n-5*x-8*y)%10==0:\n            count+=1\nprint(count)' },
+            { id:'q7', color:'var(--accent-red)', icon:'🔍', title:'完全数判断', desc:'寻找数字的完美伴侣', diff:'中等', descFull:'判断输入是否完全数。', inputDesc:'一个正整数。', outputDesc:'YES或NO。', example:'输入：6\n输出：YES', tip:'因数和等于本身。', code:'n = int(input())\nsum_factors = sum(i for i in range(1,n) if n%i==0)\nprint("YES" if sum_factors==n else "NO")' },
+            { id:'q8', color:'var(--accent-green)', icon:'🤝', title:'最小公倍数', desc:'数字的和谐共鸣', diff:'中等', descFull:'输入两个正整数，输出LCM。', inputDesc:'两个正整数。', outputDesc:'最小公倍数。', example:'输入：12 18\n输出：36', tip:'LCM = a*b//GCD', code:'import math\na,b=map(int,input().split())\nprint(a*b//math.gcd(a,b))' },
+            { id:'q9', color:'var(--accent-yellow)', icon:'🔢', title:'统计素数个数', desc:'质数的神秘领地', diff:'困难', descFull:'统计区间[m,n]内素数个数。', inputDesc:'m n', outputDesc:'素数个数。', example:'输入：2 20\n输出：8', tip:'检查到平方根。', code:'def is_prime(n):\n    if n<2: return False\n    for i in range(2,int(n**0.5)+1):\n        if n%i==0: return False\n    return True\nm,n=map(int,input().split())\nprint(sum(1 for i in range(m,n+1) if is_prime(i)))' },
+            { id:'q10', color:'var(--accent-purple)', icon:'➕', title:'数字各位之和', desc:'拆解数字的密码', diff:'简单', descFull:'求各位数字和。', inputDesc:'一个整数。', outputDesc:'各位和。', example:'输入：1234\n输出：10', tip:'字符串或用%运算。', code:'n = input()\nprint(sum(int(d) for d in n))' },
+            { id:'q11', color:'var(--accent-orange)', icon:'🔄', title:'字符串单词反转', desc:'文字的魔术表演', diff:'中等', descFull:'反转单词顺序。', inputDesc:'一句英文。', outputDesc:'反转后的句子。', example:'输入：I love Python\n输出：Python love I', tip:'split[::-1]再join', code:'s = input().split()\nprint(\' \'.join(s[::-1]))' },
+            { id:'q12', color:'var(--accent-red)', icon:'🌀', title:'斐波那契数列', desc:'黄金分割的韵律', diff:'困难', descFull:'第n项斐波那契数。', inputDesc:'n', outputDesc:'第n项值。', example:'输入：7\n输出：13', tip:'迭代更新。', code:'n=int(input())\na,b=1,1\nfor _ in range(n-1):\n    a,b=b,a+b\nprint(a)' },
+            { id:'q13', color:'var(--accent-green)', icon:'🎲', title:'不含数字7统计', desc:'躲避数字7的冒险', diff:'困难', descFull:'统计1~n中不包含数字7的个数。', inputDesc:'n', outputDesc:'个数。', example:'输入：20\n输出：18', tip:"'7' not in str(i)", code:'n=int(input())\nprint(sum(1 for i in range(1,n+1) if \'7\' not in str(i)))' },
+            { id:'q14', color:'var(--accent-yellow)', icon:'📊', title:'成绩分级统计', desc:'分数的等级舞台', diff:'中等', descFull:'输入6个分数，统计各等级人数。', inputDesc:'6个0~100整数。', outputDesc:'优秀 良好 及格 不及格人数。', example:'输入：95 88 72 59 91 66\n输出：2 1 2 1', tip:'if-elif区间。', code:'scores=list(map(int,input().split()))\na=b=c=d=0\nfor s in scores:\n    if s>=90: a+=1\n    elif s>=80: b+=1\n    elif s>=60: c+=1\n    else: d+=1\nprint(a,b,c,d)' },
+            { id:'q15', color:'var(--accent-purple)', icon:'🪞', title:'回文数判断', desc:'正反相同的对称美', diff:'中等', descFull:'判断整数是否回文。', inputDesc:'一个整数。', outputDesc:'Palindrome或Not。', example:'输入：121\n输出：Palindrome', tip:'字符串正反比较。', code:'n=input()\nprint("Palindrome" if n==n[::-1] else "Not")' },
+            { id:'q16', color:'var(--accent-orange)', icon:'📐', title:'累加平方和', desc:'平方数的累积力量', diff:'简单', descFull:'计算1²+2²+...+n²。', inputDesc:'n', outputDesc:'平方和。', example:'输入：4\n输出：30', tip:'sum(i**2)或公式。', code:'n=int(input())\nprint(sum(i**2 for i in range(1,n+1)))' }
+        ];
+
+        // ========== 本地存储学生答案 ==========
+        function saveSubmission(qId, qTitle, studentName, code) {
+            const submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            submissions.push({
+                id: Date.now(),
+                questionId: qId,
+                questionTitle: qTitle,
+                student: studentName,
+                code: code,
+                timestamp: new Date().toLocaleString('zh-CN')
+            });
+            localStorage.setItem('submissions', JSON.stringify(submissions));
+            alert(`已提交！当前共 ${submissions.length} 条记录。`);
+        }
+
+        function getSubmissions() {
+            return JSON.parse(localStorage.getItem('submissions') || '[]');
+        }
+
+        // ========== 教师面板 ==========
+        function openTeacherPanel() {
+            const input = prompt('请输入教师密码：');
+            if (input !== TEACHER_PASSWORD) {
+                if (input !== null) alert('密码错误！');
+                return;
+            }
+            const submissions = getSubmissions();
+            const content = document.getElementById('teacher-content');
+            if (submissions.length === 0) {
+                content.innerHTML = '<p style="color:var(--text-gray);">暂无提交记录。</p>';
+            } else {
+                const grouped = {};
+                submissions.forEach(s => {
+                    if (!grouped[s.questionId]) grouped[s.questionId] = { title: s.questionTitle, items: [] };
+                    grouped[s.questionId].items.push(s);
+                });
+                let html = '';
+                for (const [qId, group] of Object.entries(grouped)) {
+                    html += `<h3 style="color:var(--accent-green); margin-top:20px;">📌 ${group.title} (${group.items.length}条)</h3>`;
+                    group.items.forEach(item => {
+                        html += `
+                        <div class="submission-item">
+                            <small>👤 ${item.student} | 🕐 ${item.timestamp}</small>
+                            <pre style="white-space:pre-wrap; background:rgba(0,0,0,0.5); padding:10px; border-radius:8px; font-family:monospace;">${item.code}</pre>
+                        </div>`;
+                    });
+                }
+                content.innerHTML = html;
+            }
+            document.getElementById('teacher-modal').classList.add('active');
+        }
+
+        function closeTeacherPanel() {
+            document.getElementById('teacher-modal').classList.remove('active');
+        }
+
+        // 点击遮罩关闭
+        document.getElementById('teacher-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeTeacherPanel();
+        });
+
+        // ========== 渲染函数 ==========
+        function showQuizAnswer(cardElement) {
+            if (!verifyPassword()) return;
+            const answerDiv = cardElement.querySelector('.quiz-answer');
+            if (answerDiv) answerDiv.style.display = 'block';
+        }
+
+        function toggleCodeVisibility(headerElement) {
+            if (!verifyPassword()) return;
+            const codeBlock = headerElement.nextElementSibling;
+            if (codeBlock) codeBlock.style.display = codeBlock.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function renderHomeCards() {
+            const grid = document.getElementById('home-card-grid');
+            grid.innerHTML = allQuestions.map((q, idx) => `
+                <div class="card" style="--card-color: ${q.color}" onclick="showQuestion(${idx})">
+                    <div class="card-icon">${q.icon}</div>
+                    <div class="card-header"><div class="card-number">${String(idx+1).padStart(2,'0')}</div></div>
+                    <h3>${q.title}</h3><div class="card-desc">${q.desc}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderQuizCards() {
+            const grid = document.getElementById('quiz-card-grid');
+            grid.innerHTML = quizData.map((item, idx) => {
+                const ansText = item.ans === null ? '⚠️ 无正确选项' 
+                                : Array.isArray(item.ans) ? item.ans.map(i => item.opts[i].charAt(0)).join('、')
+                                : item.opts[item.ans].charAt(0);
+                const color = ['var(--accent-red)','var(--accent-green)','var(--accent-yellow)','var(--accent-purple)','var(--accent-orange)','var(--accent-pink)'][idx % 6];
+                return `
+                <div class="card quiz-card" style="--card-color: ${color};" onclick="showQuizAnswer(this)">
+                    <div class="card-icon">${idx+1}.</div>
+                    <h3 style="white-space:pre-wrap">${item.q.replace(/\n/g, '<br>')}</h3>
+                    ${item.opts.map(o => `<div class="quiz-option">${o}</div>`).join('')}
+                    <div class="quiz-answer" style="display:none;">✅ 参考答案：${ansText}<br><small>${item.exp}</small></div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderQuestionSection() {
+            const section = document.getElementById('questions');
+            let html = `<div id="question-list"><h2 style="text-align:center;margin-bottom:30px;color:var(--accent-cyan);">📋 编程题列表</h2><div class="card-grid">`;
+            html += allQuestions.map((q, idx) => `
+                <div class="card" style="--card-color: ${q.color}" onclick="showQuestion(${idx})">
+                    <div class="card-icon">${q.icon}</div>
+                    <div class="card-header"><div class="card-number">${String(idx+1).padStart(2,'0')}</div></div>
+                    <h3>${q.title}</h3><div class="card-desc">${q.desc}</div>
+                </div>
+            `).join('');
+            html += `</div></div>`;
+            html += allQuestions.map((q, idx) => `
+                <div id="${q.id}" class="question-page" style="display:none;">
+                    <div class="question-detail" style="--question-color: ${q.color};">
+                        <div class="question-header">
+                            <div class="question-number-big">${String(idx+1).padStart(2,'0')}</div>
+                            <div class="question-title-section"><h2>${q.icon} ${q.title}</h2><div class="question-subtitle">${q.desc}</div></div>
+                            <div class="difficulty-badge">难度 ${q.diff}</div>
+                        </div>
+                        <div class="content-block"><h4>📖 题目描述</h4><p>${q.descFull}</p></div>
+                        <div class="content-block"><h4>📥 输入描述</h4><p>${q.inputDesc}</p></div>
+                        <div class="content-block"><h4>📤 输出描述</h4><p>${q.outputDesc}</p></div>
+                        <div class="example-box"><h4 style="color:${q.color};">💡 输入输出样例</h4><p style="white-space:pre-line">${q.example}</p></div>
+                        <div class="tip-box"><h4> 思路提示</h4><p>${q.tip}</p></div>
+                        <div class="content-block">
+                            <h4 class="toggle-code" onclick="toggleCodeVisibility(this)">参考代码（点击验证密码后显示）</h4>
+                            <div class="code-block" style="display:none;">${q.code.replace(/\n/g, '<br>')}</div>
+                        </div>
+                        <!-- 学生提交区域 -->
+                        <div class="student-submit">
+                            <h4> 学生提交答案</h4>
+                            <input type="text" id="student-name-${q.id}" placeholder="请输入你的姓名">
+                            <textarea id="student-code-${q.id}" placeholder="在此编写你的Python代码..."></textarea>
+                            <button onclick="submitStudentAnswer('${q.id}', '${q.title.replace(/'/g, "\\'")}')">✅ 提交答案</button>
+                        </div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-nav" onclick="prevQuestion(${idx})">← 上一题</button>
+                        <button class="btn-nav" onclick="showSection('questions', true);">题目列表</button>
+                        <button class="btn-nav" onclick="nextQuestion(${idx})">下一题 →</button>
+                    </div>
+                </div>
+            `).join('');
+            section.innerHTML = html;
+        }
+
+        function submitStudentAnswer(qId, qTitle) {
+            const nameInput = document.getElementById(`student-name-${qId}`);
+            const codeInput = document.getElementById(`student-code-${qId}`);
+            const name = nameInput.value.trim();
+            const code = codeInput.value.trim();
+            if (!name) { alert('请输入姓名！'); return; }
+            if (!code) { alert('请输入代码！'); return; }
+            saveSubmission(qId, qTitle, name, code);
+            nameInput.value = '';
+            codeInput.value = '';
+        }
+
+        // ========== 页面切换 ==========
+        function showSection(sectionId, updateNav) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(sectionId);
+            if (target) target.classList.add('active');
+            if (sectionId === 'questions') {
+                const ql = document.getElementById('question-list');
+                if (ql) ql.style.display = 'block';
+                document.querySelectorAll('.question-page').forEach(q => q.style.display = 'none');
+            }
+            if (updateNav) {
+                document.querySelectorAll('.nav-links a').forEach(a => {
+                    a.classList.remove('active');
+                    if (a.getAttribute('onclick') && a.getAttribute('onclick').includes(`'${sectionId}'`)) a.classList.add('active');
+                });
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function showQuestion(index) {
+            const qSec = document.getElementById('questions');
+            if (qSec && !qSec.classList.contains('active')) {
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                qSec.classList.add('active');
+            }
+            const ql = document.getElementById('question-list');
+            if (ql) ql.style.display = 'none';
+            document.querySelectorAll('.question-page').forEach(q => q.style.display = 'none');
+            const target = document.getElementById(allQuestions[index].id);
+            if (target) target.style.display = 'block';
+            window.scrollTo(0, 0);
+            document.querySelectorAll('.nav-links a').forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('onclick') && a.getAttribute('onclick').includes("'questions'")) a.classList.add('active');
+            });
+        }
+
+        function prevQuestion(index) { if (index > 0) showQuestion(index - 1); else showSection('questions', true); }
+        function nextQuestion(index) { if (index < allQuestions.length - 1) showQuestion(index + 1); else showSection('questions', true); }
+
+        document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', function(e) {
+            e.preventDefault();
+            const m = this.getAttribute('onclick').match(/'([^']+)'/);
+            if (m) showSection(m[1], true);
+        }));
+
+        document.addEventListener('keydown', function(e) {
+            const vis = Array.from(document.querySelectorAll('.question-page')).find(q => q.style.display === 'block');
+            if (!vis) return;
+            const idx = allQuestions.findIndex(q => q.id === vis.id);
+            if (e.key === 'ArrowLeft') { e.preventDefault(); prevQuestion(idx); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); nextQuestion(idx); }
+            else if (e.key === 'Escape') { e.preventDefault(); showSection('questions', true); }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('code-block')) {
+                const code = e.target.innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    const orig = e.target.innerHTML;
+                    e.target.innerHTML = '// 已复制到剪贴板!<br>' + orig;
+                    setTimeout(() => { e.target.innerHTML = orig; }, 1500);
+                }).catch(()=>{});
+            }
+        });
+
+        // 粒子背景
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const particles = [];
+        const colors = ['#00d9ff','#ff6b6b','#4ecc5c','#ffd93d','#c084fc','#ff950a'];
+        class Particle {
+            constructor() { this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*3+1; this.speedX=Math.random()*1-0.5; this.speedY=Math.random()*1-0.5; this.color=colors[Math.floor(Math.random()*colors.length)]; this.opacity=Math.random()*0.5+0.2; }
+            update() { this.x+=this.speedX; this.y+=this.speedY; if(this.x>canvas.width)this.x=0; if(this.x<0)this.x=canvas.width; if(this.y>canvas.height)this.y=0; if(this.y<0)this.y=canvas.height; }
+            draw() { ctx.fillStyle=this.color; ctx.globalAlpha=this.opacity; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
+        }
+        for(let i=0;i<60;i++) particles.push(new Particle());
+        function animate() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            for(let i=0;i<particles.length;i++) { particles[i].update(); particles[i].draw(); for(let j=i;j<particles.length;j++) { const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y; const dist=Math.sqrt(dx*dx+dy*dy); if(dist<150){ ctx.beginPath(); ctx.strokeStyle=particles[i].color; ctx.globalAlpha=0.1*(1-dist/150); ctx.lineWidth=1; ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.stroke(); } } }
+            requestAnimationFrame(animate);
+        }
+        animate();
+        window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+
+        renderHomeCards();
+        renderQuizCards();
+        renderQuestionSection();
+    </script>
+</body>
+</html>
